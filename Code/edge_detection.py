@@ -1,61 +1,49 @@
 from PIL import Image, ImageDraw
+import sys
+
+
+open_path = sys.argv[1]
+save_path = sys.argv[2]
+print(open_path, save_path)
+
 
 def rgb_sum(img, i, j):
     return (img[j, i][0] + img[j, i][1] + img[j, i][2]) / 3
 
 
-def sobel_gradient (img, i, j, width, height):
-    g_x = 0
-    g_y = 0
-    matrix_x = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]]
-    matrix_y = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]]
-    if i == 0:
-        for t in range(3):
-            matrix_x[1][t] += matrix_x[0][t]
-            matrix_y[1][t] += matrix_y[0][t]
-            matrix_x[0][t] = 0
-            matrix_y[0][t] = 0
-    if j == 0:
-        for t in range(3):
-            matrix_x[t][1] += matrix_x[t][0]
-            matrix_y[t][1] += matrix_y[t][0]
-            matrix_x[t][0] = 0
-            matrix_y[t][0] = 0
-    if i + 1 == height:
-        for t in range(3):
-            matrix_x[1][t] += matrix_x[2][t]
-            matrix_y[1][t] += matrix_y[2][t]
-            matrix_x[2][t] = 0
-            matrix_y[2][t] = 0
-    if j + 1 == width:
-        for t in range(3):
-            matrix_x[t][1] += matrix_x[t][2]
-            matrix_y[t][1] += matrix_y[t][2]
-            matrix_x[t][2] = 0
-            matrix_y[t][2] = 0
-    for ii in range(3):
-        for jj in range(3):
-            if matrix_x[ii][jj] != 0:
-                g_x += matrix_x[ii][jj] * rgb_sum(img, i + ii - 1, j + jj - 1)
-            if matrix_y[ii][jj] != 0:
-                g_y += matrix_y[ii][jj] * rgb_sum(img, i + ii - 1, j + jj - 1)
+def sobel_gradient(img, i, j):
+    g_x = - img[i - 1][j - 1] - 2 * img[i - 1][j] - \
+          img[i - 1][j + 1] + img[i + 1][j - 1] + \
+          2 * img[i + 1][j] + matrix[i + 1][j + 1]
+    g_y = - img[i - 1][j - 1] + img[i - 1][j + 1] - \
+          2 * img[i][j - 1] + 2 * img[i][j + 1] - \
+          img[i + 1][j - 1] + img[i + 1][j + 1]
     return (g_x ** 2 + g_y ** 2) ** (1 / 2)
 
 
-image1 = Image.open("IMG_20170807_005605.jpg")
-image2 = Image.open("IMG_20170807_005605.jpg")
+image1 = Image.open(open_path)
+image2 = Image.open(open_path)
 draw = ImageDraw.Draw(image2)
 width = image1.size[0]
 height = image1.size[1]
 pix = image1.load()
+matrix = [[0 for j in range(width + 2)] for i in range(height + 2)]
 for i in range(height):
     for j in range(width):
-        temp = int(sobel_gradient(pix, i, j, width, height))
-        if temp > 30:
+        matrix[i + 1][j + 1] = rgb_sum(pix, i, j)
+    matrix[i + 1][0] = matrix[i + 1][1]
+    matrix[i + 1][width + 1] = matrix[i + 1][width]
+for j in range(width + 2):
+    matrix[0][j] = matrix[1][j]
+    matrix[height + 1][j] = matrix[height][j]
+for i in range(height):
+    for j in range(width):
+        temp = int(sobel_gradient(matrix, i + 1, j + 1))
+        if temp > 100:
             temp = 255
         else:
             temp = 0
         draw.point((j, i), (temp, temp, temp))
 
-image2.save("ans.jpg", "JPEG")
+image2.save(save_path, "PPM")
 del draw
