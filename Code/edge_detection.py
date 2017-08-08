@@ -12,12 +12,12 @@ def rgb_sum(img, i, j):
 
 
 def sobel_gradient(img, i, j):
-    g_x = - img[i - 1][j - 1] - 2 * img[i - 1][j] - \
-          img[i - 1][j + 1] + img[i + 1][j - 1] + \
-          2 * img[i + 1][j] + matrix[i + 1][j + 1]
-    g_y = - img[i - 1][j - 1] + img[i - 1][j + 1] - \
+    g_x = - img[i - 1][j - 1] + img[i - 1][j + 1] - \
           2 * img[i][j - 1] + 2 * img[i][j + 1] - \
           img[i + 1][j - 1] + img[i + 1][j + 1]
+    g_y = - img[i - 1][j - 1] - 2 * img[i - 1][j] - \
+          img[i - 1][j + 1] + img[i + 1][j - 1] + \
+          2 * img[i + 1][j] + matrix[i + 1][j + 1]
     return (g_x ** 2 + g_y ** 2) ** (1 / 2)
 
 
